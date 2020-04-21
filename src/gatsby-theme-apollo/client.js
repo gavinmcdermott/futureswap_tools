@@ -12,8 +12,11 @@ import fetch from "isomorphic-fetch"
 // WS subscriptions: 
 // https://www.apollographql.com/docs/react/api/react-hooks/#usesubscriptions
 
-const mainnetHTTP = "https://api.thegraph.com/subgraphs/name/jesseabram/futureswap";
-const mainnetWS = "wss://api.thegraph.com/subgraphs/name/jesseabram/futureswap";
+// const mainnetHTTP = "https://api.thegraph.com/subgraphs/name/jesseabram/futureswap";
+// const mainnetWS = "wss://api.thegraph.com/subgraphs/name/jesseabram/futureswap";
+
+const mainnetHTTP = "https://api.thegraph.com/subgraphs/name/futureswap/futureswap-v1";
+const mainnetWS = "https://api.thegraph.com/subgraphs/name/futureswap/futureswap-v1";
 
 const client = new ApolloClient({
   link: ApolloLink.split(

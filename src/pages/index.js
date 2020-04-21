@@ -1,59 +1,77 @@
-/** @jsx jsx */
-import { Styled, jsx } from "theme-ui"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { navigate } from "gatsby"
 import gql from "graphql-tag"
 import { useQuery } from "@apollo/react-hooks"
+import web3 from 'web3'
 
 import Layout from "../components/layout"
 import Image from "../components/image"
 import SEO from "../components/seo"
 
-const APOLLO_QUERY = gql`
+
+// const INITIAL_STATE = {
+//   trades: [],
+//   status: 'IDLE'
+// }
+
+// const reducer = (state, action) => {
+//   switch (action.type) {
+//     case 'updateTransactions':
+//       return { ...state, [action.field]: action.value }
+//       break;
+//     default:
+//       console.error('Invalid case!')
+//   }
+// }
+
+
+
+
+const GET_LAST_TRADE = gql`
   query {
-    trades(first: 5) {
+    trades(
+      first: 5,
+      orderBy: tradeId,
+      orderDirection: desc,
+      where: {
+        tradeOpen: true
+        exchange: "0xF2d5cBa15c8367dd016FC9c4711443e61c7d95A6"
+      }
+    ) {
       id
       exchange
       tradeId
       tradeOpen
+      stablePrice
+      assetPrice
+      isLong
     }
   }
 `
 
 const IndexPage = props => {
-  const { data, loading, error } = useQuery(APOLLO_QUERY, {
-    context: { WS: false }
-  })
+  const { data, loading, error } = useQuery(GET_LAST_TRADE, { context: { WS: false }, },)
+  const [shorts, setShorts] = useState([])
+  const [longs, setLongs] = useState([])
+
+  useEffect(() => {
+    if (!data) {
+      return
+    }
+    
+    setLongs(data.trades.filter(t => t.isLong))
+    setShorts(data.trades.filter(t => !t.isLong))
+
+  }, [data])
+
   return (
     <Layout>
       <SEO title="Home" />
-      <Styled.h1>Hi people</Styled.h1>
-      <Styled.p> and...</Styled.p>
-      <Styled.h1>
-        {data ? data.hello : loading ? "Loading..." : error && error.message}
-      </Styled.h1>
-      <Styled.p>Welcome.</Styled.p>
-      <Styled.p>
-        Start by checking <Styled.code>src/pages/index.js</Styled.code> to see
-        an example query using the
-        <Styled.code>useQuery</Styled.code> hook from{" "}
-        <Styled.code>@apollo/react-hooks</Styled.code>.{" "}
-      </Styled.p>
-      <Styled.p>
-        Also check <Styled.code>functions/graphql/graphql.js</Styled.code> to
-        start developing your Apollo Server.
-      </Styled.p>
-      <Styled.p>
-        Aditionally, you can find Apollo Server's GraphQL Playground{" "}
-        <Styled.a href={`${props.location.origin}/.netlify/functions/graphql`}>
-          here
-        </Styled.a>
-        .
-      </Styled.p>
-      <Styled.p>Now go build something great.</Styled.p>
-      <Styled.a href="#" onClick={() => navigate("/page-2/")}>
-        Go to page 2
-      </Styled.a>
+      {data && data.trades ? JSON.stringify(data.trades) : loading ? "Loading..." : error && error.message}
+      <hr/>
+      {JSON.stringify(longs)}
+      <hr/>
+      {JSON.stringify(shorts)}
     </Layout>
   )
 }
