@@ -44,6 +44,7 @@
     "web3": "^1.2.6"
   },
   "devDependencies": {
+    "electron": "^8.2.3",
     "prettier": "^1.18.2"
   },
   "keywords": [

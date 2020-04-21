@@ -1,7 +1,7 @@
 module.exports = {
   siteMetadata: {
     title: `Futureswap.tools`,
-    description: `This is the home of the Futureswap community.`,
+    description: `The home of the Futureswap community.`,
     author: `@gavinmcdermott`,
   },
   plugins: [
