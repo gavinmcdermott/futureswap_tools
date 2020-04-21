@@ -7,7 +7,7 @@ import React from "react"
 const Logos = () => {
   return (
     <div>
-      These are the Logos
+      These will be the links
     </div>
   )
 }

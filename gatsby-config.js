@@ -1,8 +1,8 @@
 module.exports = {
   siteMetadata: {
-    title: `Gatsby Starter Apollo Netlify`,
-    description: `This project is an easy way to start developing fullstack apps with Gatsby and Apollo Server (using Netlify Lambda functions). For developing we use Netlify Dev to bring all of this magic to our local machine.`,
-    author: `@piducancore`,
+    title: `Futureswap.tools`,
+    description: `This is the home of the Futureswap community.`,
+    author: `@gavinmcdermott`,
   },
   plugins: [
     `gatsby-theme-material-ui`,
@@ -23,9 +23,9 @@ module.exports = {
         name: `gatsby-starter-default`,
         short_name: `starter`,
         start_url: `/`,
-        background_color: `#663399`,
-        theme_color: `#663399`,
-        display: `minimal-ui`,
+        // background_color: `#663399`,
+        // theme_color: `#663399`,
+        // display: `minimal-ui`,
         icon: `src/images/gatsby-icon.png`, // This path is relative to the root of the site.
       },
     },
