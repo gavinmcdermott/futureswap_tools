@@ -7,6 +7,7 @@ import web3 from 'web3'
 import Layout from "../components/layout"
 import Image from "../components/image"
 import SEO from "../components/seo"
+import Positions from "../components/positions"
 
 
 // const INITIAL_STATE = {
@@ -30,7 +31,7 @@ import SEO from "../components/seo"
 const GET_LAST_TRADE = gql`
   query {
     trades(
-      first: 5,
+      first: 500,
       orderBy: tradeId,
       orderDirection: desc,
       where: {
@@ -42,36 +43,23 @@ const GET_LAST_TRADE = gql`
       exchange
       tradeId
       tradeOpen
+      isLong
       stablePrice
       assetPrice
-      isLong
+      leverage
+      assetTokenBorrowed
     }
   }
 `
 
 const IndexPage = props => {
   const { data, loading, error } = useQuery(GET_LAST_TRADE, { context: { WS: false }, },)
-  const [shorts, setShorts] = useState([])
-  const [longs, setLongs] = useState([])
-
-  useEffect(() => {
-    if (!data) {
-      return
-    }
-    
-    setLongs(data.trades.filter(t => t.isLong))
-    setShorts(data.trades.filter(t => !t.isLong))
-
-  }, [data])
 
   return (
     <Layout>
       <SEO title="Home" />
-      {data && data.trades ? JSON.stringify(data.trades) : loading ? "Loading..." : error && error.message}
-      <hr/>
-      {JSON.stringify(longs)}
-      <hr/>
-      {JSON.stringify(shorts)}
+      {/* {data && data.trades ? JSON.stringify(data.trades) : loading ? "Loading..." : error && error.message} */}
+      <Positions data={data} />
     </Layout>
   )
 }
