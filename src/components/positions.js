@@ -35,41 +35,62 @@ import SEO from "../components/seo"
 const IndexPage = ({ data }) => {
   const [shorts, setShorts] = useState([])
   const [longs, setLongs] = useState([])
+  
+  const [longsTokenQty, setLongsTokenQty] = useState(0)
+  const [avgLong, setAvgLong] = useState(0)
+  const [largestLong, setLargestLong] = useState(0)
+
+  const [shortsTokenQty, setShortsTokenQty] = useState(0)
+  const [avgShort, setAvgShort] = useState(0)
+  const [largestShort, setLargestShort] = useState(0)
 
   useEffect(() => {
     if (!data) {
       return
     }
     
+    // Todo: move both to a single map / reduce
     setLongs(data.trades.filter(t => t.isLong))
+    const longsAccumTokenQty = _.reduce(longs, (accum, trade) => {
+      const tradeSize = Number(web3.utils.fromWei(trade.assetTokenBorrowed))
+      if (tradeSize > largestLong) {
+        setLargestLong(tradeSize)
+      }
+      return accum + tradeSize
+    }, 0)
+    setLongsTokenQty(longsAccumTokenQty)
+    setAvgLong(longsAccumTokenQty / longs.length)
+    
+
     setShorts(data.trades.filter(t => !t.isLong))
+    const shortsAccumTokenQty = _.reduce(shorts, (accum, trade) => {
+      const tradeSize = Number(web3.utils.fromWei(trade.assetTokenBorrowed))
+      if (tradeSize > largestShort) {
+        setLargestShort(tradeSize)
+      }
+      return accum + tradeSize
+    }, 0)
+    setShortsTokenQty(shortsAccumTokenQty)
+    setAvgShort(shortsAccumTokenQty / shorts.length)
+
+    
 
   }, [data])
 
   return (
     <div>
       <hr/>
-      {/* {JSON.stringify(longs)}
-      <hr/>
-      {JSON.stringify(shorts)} */}
       shorts: {shorts.length}
       <br/>
-      open shorts: {
-        shorts && _.reduce(shorts, (accum, trade) => {
-          console.log(trade.assetTokenBorrowed)
-          return accum + Number(web3.utils.fromWei(trade.assetTokenBorrowed))
-        }, 0)
-      }
+      open shorts: {shortsTokenQty} ETH
+      <br/>
+      avg position size: {avgShort} ETH | Biggest {largestShort} ETH
       <hr/>
       longs: {longs.length}
       <br/>
-      open longs: {
-        longs && _.reduce(longs, (accum, trade) => {
-          // console.log(trade.assetTokenBorrowed)
-          return accum + Number(web3.utils.fromWei(trade.assetTokenBorrowed))
-        }, 0)
-      }
-    
+      open longs: {longsTokenQty} ETH
+      <br/>
+      avg position size: {avgLong} ETH | Biggest {largestLong} ETH
     </div>
   )
 }
