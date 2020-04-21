@@ -49,9 +49,11 @@ const IndexPage = ({ data }) => {
       return
     }
     
+    
     // Todo: move both to a single map / reduce
-    setLongs(data.trades.filter(t => t.isLong))
-    const longsAccumTokenQty = _.reduce(longs, (accum, trade) => {
+    const filteredLongs = data.trades.filter(t => t.isLong)
+    setLongs(filteredLongs)
+    const longsAccumTokenQty = _.reduce(filteredLongs, (accum, trade) => {
       const tradeSize = Number(web3.utils.fromWei(trade.assetTokenBorrowed))
       if (tradeSize > largestLong) {
         setLargestLong(tradeSize)
@@ -59,11 +61,12 @@ const IndexPage = ({ data }) => {
       return accum + tradeSize
     }, 0)
     setLongsTokenQty(longsAccumTokenQty)
-    setAvgLong(longsAccumTokenQty / longs.length)
+    setAvgLong(longsAccumTokenQty / filteredLongs.length)
     
 
-    setShorts(data.trades.filter(t => !t.isLong))
-    const shortsAccumTokenQty = _.reduce(shorts, (accum, trade) => {
+    const filteredShorts = data.trades.filter(t => !t.isLong)
+    setShorts(filteredShorts)
+    const shortsAccumTokenQty = _.reduce(filteredShorts, (accum, trade) => {
       const tradeSize = Number(web3.utils.fromWei(trade.assetTokenBorrowed))
       if (tradeSize > largestShort) {
         setLargestShort(tradeSize)
@@ -71,7 +74,7 @@ const IndexPage = ({ data }) => {
       return accum + tradeSize
     }, 0)
     setShortsTokenQty(shortsAccumTokenQty)
-    setAvgShort(shortsAccumTokenQty / shorts.length)
+    setAvgShort(shortsAccumTokenQty / filteredShorts.length)
 
     
 
