@@ -28,7 +28,7 @@ import Positions from "../components/positions"
 
 
 
-const GET_LAST_TRADE = gql`
+const GET_OPEN_TRADES = gql`
   query {
     trades(
       first: 500,
@@ -53,7 +53,7 @@ const GET_LAST_TRADE = gql`
 `
 
 const IndexPage = props => {
-  const { data, loading, error } = useQuery(GET_LAST_TRADE, { context: { WS: false }, },)
+  const { data, loading, error } = useQuery(GET_OPEN_TRADES, { context: { WS: false }, },)
 
   return (
     <Layout>
