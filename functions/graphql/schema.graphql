@@ -1,4 +1,0 @@
-# Construct a schema, using GraphQL schema language
-type Query {
-  hello: String
-}

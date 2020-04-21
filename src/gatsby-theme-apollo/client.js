@@ -5,22 +5,48 @@ import { onError } from "apollo-link-error"
 import { ApolloLink } from "apollo-link"
 import fetch from "isomorphic-fetch"
 
+// Details:
+// Multi-link Setup:
+// https://www.loudnoises.us/next-js-two-apollo-clients-two-graphql-data-sources-the-easy-way/
+// https://www.apollographql.com/docs/link/composition/
+// WS subscriptions: 
+// https://www.apollographql.com/docs/react/api/react-hooks/#usesubscriptions
+
+const mainnetHTTP = "https://api.thegraph.com/subgraphs/name/jesseabram/futureswap";
+const mainnetWS = "wss://api.thegraph.com/subgraphs/name/jesseabram/futureswap";
+
 const client = new ApolloClient({
-  link: ApolloLink.from([
-    onError(({ graphQLErrors, networkError }) => {
-      if (graphQLErrors)
-        graphQLErrors.forEach(({ message, locations, path }) =>
-          console.log(
-            `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+  link: ApolloLink.split(
+    (operation) => operation.getContext().WS === true,
+    ApolloLink.from([
+      onError(({ graphQLErrors, networkError }) => {
+        if (graphQLErrors)
+          graphQLErrors.forEach(({ message, locations, path }) =>
+            console.log(
+              `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+            )
           )
-        )
-      if (networkError) console.log(`[Network error]: ${networkError}`)
-    }),
-    new HttpLink({
-      uri: "/.netlify/functions/graphql",
-      // credentials: "same-origin",
-    }),
-  ]),
+        if (networkError) console.log(`[Network error]: ${networkError}`)
+      }),
+      new HttpLink({
+        uri: mainnetWS,
+      }),
+    ]),
+    ApolloLink.from([
+      onError(({ graphQLErrors, networkError }) => {
+        if (graphQLErrors)
+          graphQLErrors.forEach(({ message, locations, path }) =>
+            console.log(
+              `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+            )
+          )
+        if (networkError) console.log(`[Network error]: ${networkError}`)
+      }),
+      new HttpLink({
+        uri: mainnetHTTP,
+      }),
+    ]),
+  ),
   cache: new InMemoryCache(),
   fetch,
 })

@@ -11,12 +11,19 @@ import SEO from "../components/seo"
 
 const APOLLO_QUERY = gql`
   query {
-    hello
+    trades(first: 5) {
+      id
+      exchange
+      tradeId
+      tradeOpen
+    }
   }
 `
 
 const IndexPage = props => {
-  const { data, loading, error } = useQuery(APOLLO_QUERY)
+  const { data, loading, error } = useQuery(APOLLO_QUERY, {
+    context: { WS: false }
+  })
   return (
     <Layout>
       <SEO title="Home" />

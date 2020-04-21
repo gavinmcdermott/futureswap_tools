@@ -13,6 +13,8 @@
     "apollo-link": "^1.2.13",
     "apollo-link-error": "^1.1.12",
     "apollo-link-http": "^1.5.16",
+    "apollo-link-ws": "^1.0.20",
+    "dotenv": "^8.2.0",
     "gatsby": "^2.15.35",
     "gatsby-image": "^2.2.27",
     "gatsby-plugin-manifest": "^2.2.21",
@@ -30,7 +32,9 @@
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
     "react-helmet": "^5.2.1",
-    "theme-ui": "^0.3.1"
+    "subscriptions-transport-ws": "^0.9.16",
+    "theme-ui": "^0.3.1",
+    "web3": "^1.2.6"
   },
   "devDependencies": {
     "prettier": "^1.18.2"
