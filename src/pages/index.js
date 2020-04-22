@@ -9,6 +9,7 @@ import Image from "../components/image"
 import SEO from "../components/seo"
 import Positions from "../components/positions"
 import Pools from "../components/pools"
+import TokenPools from "../components/token-pools"
 
 
 // const INITIAL_STATE = {
@@ -35,7 +36,8 @@ const IndexPage = props => {
   return (
     <Layout>
       <SEO title="Home" />
-      <Pools />
+      <TokenPools />
+      {/* <Pools /> */}
       <Positions />
     </Layout>
   )

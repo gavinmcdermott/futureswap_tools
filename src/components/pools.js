@@ -10,6 +10,42 @@ import Layout from "../components/layout"
 import Image from "../components/image"
 import SEO from "../components/seo"
 
+/*
+uint256 assetTokenBorrowPool; // the amount of asset currently being borrowed by long trades
+uint256 longBorrowValue; // the combined value at open of outstanding long trades
+uint256 shortAssetBorrowPool; // the asset equivalent amount of stable being borrowed by short trades
+uint256 shortBorrowValue; // the combined value at open of outstanding short trades
+uint256 stableTokenBorrowPool; // the amount of stable currently being borrowed by short trades
+uint256 stableTokenCollateralPool; // the amount of collateral(stable) currently held in the contract
+uint256 stablePoolSharesOutstanding; // the number of shares currently outstanding for the stable pool
+*/
+
+const GET_TOKEN_POOLS = gql`
+  query {
+    tokenPools(
+      first:1
+    ) {
+      id
+      reason
+      exchange
+      timestamp
+      assetTokenAvailable
+      stableTokenAvailable
+      
+      assetTokenBorrowPool          # the amount of asset currently being borrowed by long trades
+      stableTokenBorrowPool         # the amount of stable currently being borrowed by short trades
+      
+      shortAssetBorrowPool          # the asset equivalent amount of stable being borrowed by short trades
+      
+      longBorrowValue               # the combined value at open of outstanding long trades
+      shortBorrowValue              # the combined value at open of outstanding short trades
+      
+      stablePoolSharesOutstanding   # the number of shares currently outstanding for the stable pool
+      stableTokenCollateralPool     # the amount of collateral(stable) currently held in the contract
+    }
+  }
+`
+
 
 const GET_LIQUIDITY_EVENTS = gql`
   query {
