@@ -28,38 +28,15 @@ import Positions from "../components/positions"
 
 
 
-const GET_OPEN_TRADES = gql`
-  query {
-    trades(
-      first: 500,
-      orderBy: tradeId,
-      orderDirection: desc,
-      where: {
-        tradeOpen: true
-        exchange: "0xF2d5cBa15c8367dd016FC9c4711443e61c7d95A6"
-      }
-    ) {
-      id
-      exchange
-      tradeId
-      tradeOpen
-      isLong
-      stablePrice
-      assetPrice
-      leverage
-      assetTokenBorrowed
-    }
-  }
-`
+
 
 const IndexPage = props => {
-  const { data, loading, error } = useQuery(GET_OPEN_TRADES, { context: { WS: false }, },)
+  // const { data, loading, error } = useQuery(GET_OPEN_TRADES, { context: { WS: false }, },)
 
   return (
     <Layout>
       <SEO title="Home" />
-      {/* {data && data.trades ? JSON.stringify(data.trades) : loading ? "Loading..." : error && error.message} */}
-      <Positions data={data} />
+      <Positions />
     </Layout>
   )
 }

@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import moment from 'moment'
 import React, { useEffect, useState } from "react"
 import { navigate } from "gatsby"
 import gql from "graphql-tag"
@@ -9,30 +10,53 @@ import Layout from "../components/layout"
 import Image from "../components/image"
 import SEO from "../components/seo"
 
+const GET_OPEN_TRADES = gql`
+  query {
+    trades(
+      first: 500,
+      orderBy: tradeId,
+      orderDirection: desc,
+      where: {
+        tradeOpen: true
+        exchange: "0xF2d5cBa15c8367dd016FC9c4711443e61c7d95A6"
+      }
+    ) {
+      isLong
+      assetTokenBorrowed
+    }
+  }
+`
 
-// const GET_LAST_TRADE = gql`
-//   query {
-//     trades(
-//       first: 5,
-//       orderBy: tradeId,
-//       orderDirection: desc,
-//       where: {
-//         tradeOpen: true
-//         exchange: "0xF2d5cBa15c8367dd016FC9c4711443e61c7d95A6"
-//       }
-//     ) {
-//       id
-//       exchange
-//       tradeId
-//       tradeOpen
-//       stablePrice
-//       assetPrice
-//       isLong
-//     }
-//   }
-// `
+const YESTERDAY = moment().subtract(1, 'day').unix()
+console.log(YESTERDAY)
 
-const IndexPage = ({ data }) => {
+
+const GET_TRADES_LAST_24H = gql`
+  query {
+    trades(
+      first: 500,
+      orderBy: timestampOpen,
+      orderDirection: desc,
+      where: {
+        exchange: "0xF2d5cBa15c8367dd016FC9c4711443e61c7d95A6",
+        timestampOpen_gte: ${YESTERDAY}
+      }
+    ) {
+      id
+      exchange
+      tradeId
+      tradeOpen
+      timestampOpen
+      timestampClose
+    }
+  }
+`
+
+const Positions = (props) => {
+  const { data: openTrades, loading: loadingOpenTrades, error: errorOpenTrades } = useQuery(GET_OPEN_TRADES, { context: { WS: false }, },)
+  const { data: prevDayTrades, loading: loadingPrevDayTrades, error: errorPrevDayTrades } = useQuery(GET_TRADES_LAST_24H, { context: { WS: false }, },)
+  console.log('prevDayTrades', prevDayTrades)
+
   const [shorts, setShorts] = useState([])
   const [longs, setLongs] = useState([])
   
@@ -45,13 +69,14 @@ const IndexPage = ({ data }) => {
   const [largestShort, setLargestShort] = useState(0)
 
   useEffect(() => {
-    if (!data) {
+    if (!openTrades) {
       return
     }
     
-    
     // Todo: move both to a single map / reduce
-    const filteredLongs = data.trades.filter(t => t.isLong)
+
+    // Longs
+    const filteredLongs = openTrades.trades.filter(t => t.isLong)
     setLongs(filteredLongs)
     const longsAccumTokenQty = _.reduce(filteredLongs, (accum, trade) => {
       const tradeSize = Number(web3.utils.fromWei(trade.assetTokenBorrowed))
@@ -63,8 +88,8 @@ const IndexPage = ({ data }) => {
     setLongsTokenQty(longsAccumTokenQty)
     setAvgLong(longsAccumTokenQty / filteredLongs.length)
     
-
-    const filteredShorts = data.trades.filter(t => !t.isLong)
+    // Shorts
+    const filteredShorts = openTrades.trades.filter(t => !t.isLong)
     setShorts(filteredShorts)
     const shortsAccumTokenQty = _.reduce(filteredShorts, (accum, trade) => {
       const tradeSize = Number(web3.utils.fromWei(trade.assetTokenBorrowed))
@@ -78,10 +103,11 @@ const IndexPage = ({ data }) => {
 
     
 
-  }, [data])
+  }, [openTrades])
 
   return (
     <div>
+      Trades opened in last 24 hours: {prevDayTrades && prevDayTrades.trades.length}
       <hr/>
       shorts: {shorts.length}
       <br/>
@@ -98,4 +124,4 @@ const IndexPage = ({ data }) => {
   )
 }
 
-export default IndexPage
+export default Positions
