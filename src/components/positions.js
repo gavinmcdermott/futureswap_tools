@@ -13,7 +13,7 @@ import SEO from "../components/seo"
 const GET_OPEN_TRADES = gql`
   query {
     trades(
-      first: 500,
+      first: 999,
       orderBy: tradeId,
       orderDirection: desc,
       where: {
@@ -34,7 +34,7 @@ console.log(YESTERDAY)
 const GET_TRADES_LAST_24H = gql`
   query {
     trades(
-      first: 500,
+      first: 999,
       orderBy: timestampOpen,
       orderDirection: desc,
       where: {
@@ -55,6 +55,8 @@ const GET_TRADES_LAST_24H = gql`
 `
 
 const Positions = (props) => {
+  
+
   
   // HANDLE PREV 24 HOUR TRADES
 
@@ -90,6 +92,7 @@ const Positions = (props) => {
   }, [prevDayTrades])
 
   
+
   // HANDLE LONG/SHORT ON MARKET
   
   const { data: openTrades, loading: loadingOpenTrades, error: errorOpenTrades } = useQuery(GET_OPEN_TRADES, { context: { WS: false }, },)

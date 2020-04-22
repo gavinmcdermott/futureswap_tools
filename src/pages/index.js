@@ -8,6 +8,7 @@ import Layout from "../components/layout"
 import Image from "../components/image"
 import SEO from "../components/seo"
 import Positions from "../components/positions"
+import Pools from "../components/pools"
 
 
 // const INITIAL_STATE = {
@@ -31,11 +32,10 @@ import Positions from "../components/positions"
 
 
 const IndexPage = props => {
-  // const { data, loading, error } = useQuery(GET_OPEN_TRADES, { context: { WS: false }, },)
-
   return (
     <Layout>
       <SEO title="Home" />
+      <Pools />
       <Positions />
     </Layout>
   )
