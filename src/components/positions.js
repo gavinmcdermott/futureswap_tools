@@ -43,19 +43,56 @@ const GET_TRADES_LAST_24H = gql`
       }
     ) {
       id
+      isLong
       exchange
       tradeId
       tradeOpen
       timestampOpen
       timestampClose
+      assetTokenBorrowed
     }
   }
 `
 
 const Positions = (props) => {
-  const { data: openTrades, loading: loadingOpenTrades, error: errorOpenTrades } = useQuery(GET_OPEN_TRADES, { context: { WS: false }, },)
+  
+  // HANDLE PREV 24 HOUR TRADES
+
   const { data: prevDayTrades, loading: loadingPrevDayTrades, error: errorPrevDayTrades } = useQuery(GET_TRADES_LAST_24H, { context: { WS: false }, },)
-  console.log('prevDayTrades', prevDayTrades)
+  
+  const [prevShorts, setPrevShorts] = useState([])
+  const [prevLongs, setPrevLongs] = useState([])
+  
+  const [prevLongsTokenQty, setPrevLongsTokenQty] = useState(0)
+  const [prevShortsTokenQty, setPrevShortsTokenQty] = useState(0)
+
+  useEffect(() => {
+    if (!prevDayTrades) {
+      return
+    }
+
+    const filteredPrevLongs = prevDayTrades.trades.filter(t => t.isLong)
+    setPrevLongs(filteredPrevLongs)
+    const prevLongsAccumTokenQty = _.reduce(filteredPrevLongs, (accum, trade) => {
+      return accum + Number(web3.utils.fromWei(trade.assetTokenBorrowed))
+    }, 0)
+    setPrevLongsTokenQty(prevLongsAccumTokenQty)
+
+    
+    const filteredPrevShorts = prevDayTrades.trades.filter(t => !t.isLong)
+    setPrevShorts(filteredPrevShorts)
+    const prevShortsAccumTokenQty = _.reduce(filteredPrevShorts, (accum, trade) => {
+      return accum + Number(web3.utils.fromWei(trade.assetTokenBorrowed))
+    }, 0)
+    setPrevShortsTokenQty(prevShortsAccumTokenQty)
+
+
+  }, [prevDayTrades])
+
+  
+  // HANDLE LONG/SHORT ON MARKET
+  
+  const { data: openTrades, loading: loadingOpenTrades, error: errorOpenTrades } = useQuery(GET_OPEN_TRADES, { context: { WS: false }, },)
 
   const [shorts, setShorts] = useState([])
   const [longs, setLongs] = useState([])
@@ -100,15 +137,20 @@ const Positions = (props) => {
     }, 0)
     setShortsTokenQty(shortsAccumTokenQty)
     setAvgShort(shortsAccumTokenQty / filteredShorts.length)
-
-    
-
   }, [openTrades])
 
   return (
     <div>
-      Trades opened in last 24 hours: {prevDayTrades && prevDayTrades.trades.length}
+      
+      <h3>Market in Last 24 Hours</h3>
+      Trades opened over last 24 hours: {prevDayTrades && prevDayTrades.trades.length}
+      <br/>
+      {prevLongs.length} longs opened for {prevLongsTokenQty} ETH
+      <br/>
+      {prevShorts.length} shorts opened: {prevShortsTokenQty} ETH
       <hr/>
+
+      <h3>Current Market Snapshot</h3>
       shorts: {shorts.length}
       <br/>
       open shorts: {shortsTokenQty} ETH
