@@ -6,7 +6,6 @@ module.exports = {
   },
   plugins: [
     `gatsby-plugin-netlify`,
-    `gatsby-plugin-material-ui`,
     `gatsby-theme-material-ui`,
     `gatsby-theme-apollo`,
     `gatsby-plugin-react-helmet`,
