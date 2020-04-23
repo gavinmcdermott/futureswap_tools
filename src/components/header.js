@@ -12,11 +12,15 @@ import {
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+    color: '#CCC',
+    backgroundColor: '#15181f',
+    borderBottom: '1px solid #383f4e'
   },
   menuButton: {
     marginRight: theme.spacing(2),
   },
   menuLink: {
+    color: '#CCC',
     textDecoration: 'none'
   },
   title: {
