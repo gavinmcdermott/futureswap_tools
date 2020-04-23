@@ -11,27 +11,6 @@ import Positions from "../components/positions"
 import Pools from "../components/pools"
 import TokenPools from "../components/token-pools"
 
-
-// const INITIAL_STATE = {
-//   trades: [],
-//   status: 'IDLE'
-// }
-
-// const reducer = (state, action) => {
-//   switch (action.type) {
-//     case 'updateTransactions':
-//       return { ...state, [action.field]: action.value }
-//       break;
-//     default:
-//       console.error('Invalid case!')
-//   }
-// }
-
-
-
-
-
-
 const IndexPage = props => {
   return (
     <Layout>

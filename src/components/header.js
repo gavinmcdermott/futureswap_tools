@@ -28,7 +28,7 @@ const Header = ({ siteTitle }) => {
   const classes = useStyles();
 
   return (
-    <AppBar position="fixed">
+    <AppBar position="fixed" className={classes.root}>
       <Toolbar>
         <Typography variant="h6" className={classes.title}>
           Futureswap.tools

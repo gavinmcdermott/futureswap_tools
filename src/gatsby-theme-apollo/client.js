@@ -5,15 +5,20 @@ import { onError } from "apollo-link-error"
 import { ApolloLink } from "apollo-link"
 import fetch from "isomorphic-fetch"
 
-// Details:
 // Multi-link Setup:
 // https://www.loudnoises.us/next-js-two-apollo-clients-two-graphql-data-sources-the-easy-way/
 // https://www.apollographql.com/docs/link/composition/
+
 // WS subscriptions: 
 // https://www.apollographql.com/docs/react/api/react-hooks/#usesubscriptions
 
+// Live Data Manual Learning:
+// https://thegraph.com/explorer/subgraph/futureswap/futureswap-v1
+
+// Test Playground:
 // const mainnetHTTP = "https://api.thegraph.com/subgraphs/name/jesseabram/futureswap";
 // const mainnetWS = "wss://api.thegraph.com/subgraphs/name/jesseabram/futureswap";
+
 
 const mainnetHTTP = "https://api.thegraph.com/subgraphs/name/futureswap/futureswap-v1";
 const mainnetWS = "https://api.thegraph.com/subgraphs/name/futureswap/futureswap-v1";
