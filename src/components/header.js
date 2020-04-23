@@ -5,9 +5,13 @@ import { makeStyles } from '@material-ui/core/styles'
 import { 
   AppBar,
   Toolbar,
+  SvgIcon,
   Typography,
   Button
 } from '@material-ui/core'
+
+import FSLogo from '../images/fs-logo-white.svg'
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -15,6 +19,10 @@ const useStyles = makeStyles((theme) => ({
     color: '#CCC',
     backgroundColor: '#15181f',
     borderBottom: '1px solid #383f4e'
+  },
+  logo: {
+    marginTop: '-6px',
+    height: '28px',
   },
   menuButton: {
     paddingRight: theme.spacing(3), 
@@ -36,8 +44,9 @@ const Header = ({ siteTitle }) => {
   return (
     <AppBar position="fixed" className={classes.root}>
       <Toolbar>
+        <img src={FSLogo} className={classes.logo} />
         <Typography variant="h6" className={classes.title}>
-          Futureswap.tools
+          .tools
         </Typography>
 
         <Button edge="end" className={classes.menuButton} aria-label="menu">

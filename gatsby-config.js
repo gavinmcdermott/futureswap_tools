@@ -1,7 +1,7 @@
 module.exports = {
   siteMetadata: {
     title: `Futureswap.tools`,
-    description: `The home of the Futureswap community.`,
+    description: `Tools to for the Futureswap community`,
     author: `@gavinmcdermott`,
   },
   plugins: [
@@ -24,7 +24,7 @@ module.exports = {
         name: `gatsby-starter-default`,
         short_name: `starter`,
         start_url: `/`,
-        icon: `src/images/gatsby-icon.png`, // This path is relative to the root of the site.
+        icon: `src/images/fs-favicon.ico`, // This path is relative to the root of the site.
       },
     },
     // this (optional) plugin enables Progressive Web App + Offline functionality
