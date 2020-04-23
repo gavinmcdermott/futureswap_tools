@@ -17,6 +17,7 @@
     "apollo-link-error": "^1.1.12",
     "apollo-link-http": "^1.5.16",
     "apollo-link-ws": "^1.0.20",
+    "bignumber.js": "^9.0.0",
     "dotenv": "^8.2.0",
     "gatsby": "^2.15.35",
     "gatsby-image": "^2.2.27",

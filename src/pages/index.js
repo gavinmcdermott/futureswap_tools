@@ -16,6 +16,13 @@ const IndexPage = props => {
     <Layout>
       <SEO title="Home" />
       <TokenPools />
+      
+      <br/>
+      <br/>
+      <br/>
+      TODO NOTE: the rest below here is still being calculated
+      <br/>
+      <hr/>
       {/* <Pools /> */}
       <Positions />
     </Layout>

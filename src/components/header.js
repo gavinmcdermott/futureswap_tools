@@ -17,10 +17,12 @@ const useStyles = makeStyles((theme) => ({
     borderBottom: '1px solid #383f4e'
   },
   menuButton: {
-    marginRight: theme.spacing(2),
+    paddingRight: theme.spacing(3), 
+    paddingLeft: theme.spacing(3), 
+    backgroundColor: '#5b7add',
   },
   menuLink: {
-    color: '#CCC',
+    color: '#FFF',
     textDecoration: 'none'
   },
   title: {
@@ -39,8 +41,8 @@ const Header = ({ siteTitle }) => {
         </Typography>
 
         <Button edge="end" className={classes.menuButton} aria-label="menu">
-          <a className={classes.menuLink} href="https://exchange.futureswap.com/?src=TODO-PUT-IN-REF-CODE" target="_blank" >
-            Go trade on Futureswap
+          <a className={classes.menuLink} href="https://exchange.futureswap.com/?src=0x908a57d405f15cf13365d7d5FE32fCA05e324B19" target="_blank">
+            Start trading on Futureswap
           </a>
         </Button>
       </Toolbar>

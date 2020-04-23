@@ -28,8 +28,6 @@ const GET_OPEN_TRADES = gql`
 `
 
 const YESTERDAY = moment().subtract(1, 'day').unix()
-console.log(YESTERDAY)
-
 
 const GET_TRADES_LAST_24H = gql`
   query {
