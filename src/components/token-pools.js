@@ -4,11 +4,24 @@ import React, { useEffect, useState } from "react"
 import { navigate } from "gatsby"
 import gql from "graphql-tag"
 import { useQuery } from "@apollo/react-hooks"
-import web3 from 'web3'
+import DataCard from './data-card'
 
-import Layout from "./layout"
-import Image from "./image"
-import SEO from "./seo"
+import { makeStyles } from '@material-ui/core/styles'
+import { 
+  Grid,
+  Typography
+} from '@material-ui/core'
+
+import { prettyFromWei } from '../utils'
+
+const useStyles = makeStyles((theme) => ({
+  // root: {
+  //   border: `1px solid #EFEFEF`,
+  //   borderRadius: theme.spacing(1),
+  // },
+}));
+
+
 
 
 const GET_TOKEN_POOLS = gql`
@@ -39,32 +52,103 @@ const GET_TOKEN_POOLS = gql`
   }
 `
 
-const prettyFromWei = (wei) => wei && Number(web3.utils.fromWei(wei))
+
 
 const Pools = (props) => {
+  const classes = useStyles()
   const { data, loading, error } = useQuery(GET_TOKEN_POOLS, { context: { WS: false }, },)
 
-  const [pools, setPools] = useState({})
+  const [pool, setPool] = useState({})
+  const [poolCardsData, setPoolCardsData] = useState({})
+  
 
   useEffect(() => {
     if (!data) {
       return
     }
-    setPools(_.first(data.tokenPools))
+    setPool(_.first(data.tokenPools))
   }, [data])
 
-  if (loading) {
+  if (loading || !pool) {
     return <div>Loading Token Pools</div>
   }
 
-  console.log(pools)
+  
+
   return (
-    <div>
-      <h3>Market State: Token Pools</h3>
-      {pools && prettyFromWei(pools.assetTokenAvailable)} ETH still available
-      <br/>
-      {pools && prettyFromWei(pools.stableTokenAvailable)} DAI still available
-      <hr/>
+    <>
+      <Typography variant="h3" gutterBottom>ETH-DAI Exchange</Typography>
+
+      <Grid container spacing={2}>
+        <Grid item xs={4}>
+          <DataCard 
+            title="ETH Available"
+            data={prettyFromWei(pool.assetTokenAvailable)}
+            unit="ETH"
+            description="ETH available for longs"
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <DataCard 
+            title="DAI Available"
+            data={prettyFromWei(pool.stableTokenAvailable)}
+            unit="DAI"
+            description="DAI available for shorts"
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <DataCard 
+            title="ETH Long"
+            data={prettyFromWei(pool.assetTokenBorrowPool)}
+            unit="ETH"
+            description="ETH borrowed by the longs"
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <DataCard 
+            title="DAI Shorts"
+            data={prettyFromWei(pool.stableTokenBorrowPool)}
+            unit="DAI"
+            description="DAI borrowed by the shorts"
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <DataCard 
+            title="DAI equiv ETH"
+            data={prettyFromWei(pool.shortAssetBorrowPool)}
+            unit="DAI"
+            description="Equivalent ETH borrowed by shorts"
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <DataCard 
+            title="DAI Longs"
+            data={prettyFromWei(pool.longBorrowValue)}
+            unit="DAI"
+            description="Combined value of all open longs"
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <DataCard 
+            title="DAI Shorts"
+            data={prettyFromWei(pool.shortBorrowValue)}
+            unit="DAI"
+            description="Combined value of all open shorts"
+          />
+        </Grid>
+        <Grid item xs={4}>
+          <DataCard 
+            title="DAI Total in Contract"
+            data={prettyFromWei(pool.stableTokenCollateralPool)}
+            unit="DAI"
+            description="Amount of stable held in contract"
+          />
+        </Grid>
+      </Grid>
+
+
+      {/* {pools && prettyFromWei(pools.stableTokenAvailable)} DAI still available */}
+      {/* <hr/>
       {pools && prettyFromWei(pools.assetTokenBorrowPool)} ETH : being borrowed by the longs
       <br/>
       {pools && prettyFromWei(pools.stableTokenBorrowPool)} DAI : being borrowed by the shorts
@@ -76,10 +160,10 @@ const Pools = (props) => {
       {pools && prettyFromWei(pools.shortBorrowValue)} DAI : combined value of all open shorts
       <br/>
       {pools && prettyFromWei(pools.stableTokenCollateralPool)} DAI : amount of stable held in contract
-      <br/>
+      <br/> */}
       
       
-    </div>
+    </>
   )
 }
 
