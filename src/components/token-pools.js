@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import moment from 'moment'
-import BigNum from 'bignumber.js'
 import numeral from 'numeral'
 import React, { useEffect, useState } from "react"
 import { navigate } from "gatsby"
@@ -8,6 +7,8 @@ import gql from "graphql-tag"
 import { useQuery } from "@apollo/react-hooks"
 import DataCard from './data-card'
 import web3 from 'web3'
+
+import BigNumber from 'bignumber.js'
 
 import { makeStyles } from '@material-ui/core/styles'
 import { 
@@ -23,118 +24,145 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+const PREV_DAY = moment().subtract(1, 'day').unix()
+// const PREV_WEEK = moment().subtract(7, 'day').unix()
 
-const YESTERDAY = moment().subtract(1, 'day').unix()
-
-const GET_PREV_TOKEN_POOLS = gql`
-  query {
-    tokenPools(
-      first: 1,
-      orderBy: timestamp,
-      orderDirection: desc,
-      where: {
-        timestamp_gte: ${YESTERDAY}
+const buildQuery = (timestamp) => {
+  const GET_CURRENT_TOKEN_POOLS = gql`
+    query {
+      tokenPools(
+        first: 1
+        orderBy: timestamp
+        orderDirection: desc
+      ) {
+        id
+        reason
+        exchange
+        timestamp
+        assetTokenAvailable
+        stableTokenAvailable
+        assetTokenBorrowPool
+        stableTokenBorrowPool
+        shortAssetBorrowPool
+        longBorrowValue
+        shortBorrowValue
+        stablePoolSharesOutstanding
+        stableTokenCollateralPool
       }
-    ) {
-      id
-      reason
-      exchange
-      timestamp
-      assetTokenAvailable
-      stableTokenAvailable
-      assetTokenBorrowPool
-      stableTokenBorrowPool
-      shortAssetBorrowPool 
-      longBorrowValue      
-      shortBorrowValue     
-      stablePoolSharesOutstanding
-      stableTokenCollateralPool 
     }
-  }
-`
+  `
 
-const GET_TOKEN_POOLS = gql`
-  query {
-    tokenPools(
-      first: 1
-      orderBy: timestamp
-      orderDirection: desc
-    ) {
-      id
-      reason
-      exchange
-      timestamp
-      assetTokenAvailable
-      stableTokenAvailable
-      
-      assetTokenBorrowPool          # the amount of asset currently being borrowed by long trades
-      stableTokenBorrowPool         # the amount of stable currently being borrowed by short trades
-      
-      shortAssetBorrowPool          # the asset equivalent amount of stable being borrowed by short trades
-      
-      longBorrowValue               # the combined value at open of outstanding long trades
-      shortBorrowValue              # the combined value at open of outstanding short trades
-      
-      stablePoolSharesOutstanding   # the number of shares currently outstanding for the stable pool
-      stableTokenCollateralPool     # the amount of collateral(stable) currently held in the contract
+  const GET_PREV_TOKEN_POOLS = gql`
+    query {
+      tokenPools(
+        first: 1,
+        orderBy: timestamp,
+        orderDirection: asc,
+        where: {
+          timestamp_gte: ${timestamp}
+        }
+      ) {
+        id
+        reason
+        exchange
+        timestamp
+        assetTokenAvailable
+        stableTokenAvailable
+        assetTokenBorrowPool
+        stableTokenBorrowPool
+        shortAssetBorrowPool 
+        longBorrowValue      
+        shortBorrowValue     
+        stablePoolSharesOutstanding
+        stableTokenCollateralPool 
+      }
     }
-  }
-`
+  `
 
+  if (timestamp) {
+    return GET_PREV_TOKEN_POOLS
+  }
+  return GET_CURRENT_TOKEN_POOLS
+}
+
+
+const formatAndSetComputedData = ({ data, setComputedData }) => {
+
+  if (!data) {
+    throw new Error('Missing TokenPool data')
+  }
+  if (!setComputedData) {
+    throw new Error('Missing function (setComputedData) to set TokenPool data')
+  }
+  
+  const totalAssetPool = new BigNumber(data.assetTokenAvailable).plus(new BigNumber(data.assetTokenBorrowPool))
+  const assetTokenUtilization = new BigNumber(data.assetTokenBorrowPool)
+    .dividedBy(totalAssetPool)
+    .multipliedBy(new BigNumber(100))
+    .toFormat(0)
+  
+  const totalStablePool = new BigNumber(data.stableTokenAvailable).plus(new BigNumber(data.shortBorrowValue))
+  const stableTokenUtilization = new BigNumber(data.shortBorrowValue)
+    .dividedBy(totalStablePool)
+    .multipliedBy(new BigNumber(100))
+    .toFormat(0)
+
+  const assetTokenTotal = new BigNumber(data.assetTokenAvailable).plus(new BigNumber(data.assetTokenBorrowPool)).toFixed()
+  const stableTokenTotal = new BigNumber(data.stableTokenAvailable).plus(new BigNumber(data.shortBorrowValue)).toFixed()
+
+  const computed = {
+    assetTokenTotal,
+    stableTokenTotal,
+    assetTokenUtilization,
+    stableTokenUtilization
+  }
+  setComputedData(computed)
+
+}
 
 
 const Pools = (props) => {
   const classes = useStyles()
-  const { data, loading, error } = useQuery(GET_TOKEN_POOLS, { context: { WS: false }, },)
+  const { data: dataCurrent, loading: loadingCurrent, error: errorCurrent } = useQuery(buildQuery(), { context: { WS: false }, },)
+  const { data: dataPrevDay, loading: loadingPrevDay, error: errorPrevDay } = useQuery(buildQuery(PREV_DAY), { context: { WS: false }, },)
   
-  // TODO: Get prev day's data to compare percentages / create a handler for parsing data
-  // const { data: dataPrev, loading: loadingPrev, error: errorPrev } = useQuery(GET_PREV_TOKEN_POOLS, { context: { WS: false }, },)
-
-
-  const [pool, setPool] = useState({})
-  const [poolComputed, setPoolComputed] = useState({})
-  const [poolCardsData, setPoolCardsData] = useState({})
+  const [current, setCurrent] = useState({})
+  const [currentComputed, setCurrentComputed] = useState({})
   
+  const [prevDay, setPrevDay] = useState({})
+  const [prevDayComputed, setPrevDayComputed] = useState({})
 
+  
   useEffect(() => {
-    if (!data) {
+    if (!dataCurrent) {
       return
     }
+    const currentLocal = _.first(dataCurrent.tokenPools)
+    setCurrent(currentLocal)
 
-    const poolLocal = _.first(data.tokenPools)
+    formatAndSetComputedData({ 
+      data: currentLocal,  
+      setComputedData: setCurrentComputed 
+    })
+  }, [dataCurrent])
 
-    setPool(poolLocal)
 
-    const assetTokenUtilization = (
-      numeral(
-        parseFloat(poolLocal.assetTokenBorrowPool) / (
-          parseFloat(poolLocal.assetTokenAvailable) + parseFloat(poolLocal.assetTokenBorrowPool)
-        )
-      ).format('0%')
-    )
-    
-    const stableTokenUtilization = (
-      numeral(
-        parseFloat(poolLocal.shortBorrowValue) / (
-          parseFloat(poolLocal.stableTokenAvailable) + parseFloat(poolLocal.shortBorrowValue)
-        )
-      ).format('0%')
-    )
-
-    const assetTokenTotal = new BigNum(poolLocal.assetTokenAvailable).plus(new BigNum(poolLocal.assetTokenBorrowPool)).toFixed()
-    const stableTokenTotal = new BigNum(poolLocal.stableTokenAvailable).plus(new BigNum(poolLocal.shortBorrowValue)).toFixed()
-
-    const computed = {
-      assetTokenTotal,
-      stableTokenTotal,
-      assetTokenUtilization,
-      stableTokenUtilization
+  useEffect(() => {
+    if (!dataPrevDay || !_.isEmpty(prevDay)) {
+      return
     }
-    setPoolComputed(computed)
+    const prevDayLocal = _.first(dataPrevDay.tokenPools)
+    setPrevDay(prevDayLocal)
 
-  }, [data])
+    formatAndSetComputedData({ 
+      data: prevDayLocal,  
+      setComputedData: setPrevDayComputed 
+    })
+  }, [dataPrevDay])
 
-  if (loading || !pool) {
+
+
+  if (loadingCurrent || loadingPrevDay) {
     return <div>Loading Token Pools</div>
   }
 
@@ -149,37 +177,50 @@ const Pools = (props) => {
         </Grid>
 
         <DataCard 
-          grid={12}
           title="Total ETH in Long Pool"
-          data={prettyFromWei(poolComputed.assetTokenTotal)}
+          data={prettyFromWei(currentComputed.assetTokenTotal)}
           unit="ETH"
           description="Total ETH available"
         />
 
         <DataCard 
+          title="24 Hour Change"
+          data={
+            new BigNumber(currentComputed.assetTokenTotal)
+              .minus(new BigNumber(prevDayComputed.assetTokenTotal))
+              .dividedBy(new BigNumber(prevDayComputed.assetTokenTotal))
+              .multipliedBy(new BigNumber(100))
+              .toFormat(2)
+          }
+          unit="%"
+          description="Pct. change in ETH available for longs over prev 24 hours"
+        />
+
+        <DataCard 
           title="Open Longs (ETH)"
-          data={prettyFromWei(pool.assetTokenBorrowPool)}
+          data={prettyFromWei(current.assetTokenBorrowPool)}
           unit="ETH"
           description="Total ETH borrowed by long positions"
         />
 
         <DataCard 
           title="Open Longs (DAI)"
-          data={prettyFromWei(pool.longBorrowValue)}
+          data={prettyFromWei(current.longBorrowValue)}
           unit="DAI"
           description="Equivalent DAI borrowed by long positions"
         />
 
         <DataCard 
           title="Available Leverage (ETH)"
-          data={prettyFromWei(pool.assetTokenAvailable)}
+          data={prettyFromWei(current.assetTokenAvailable)}
           unit="ETH"
           description="Total ETH available for long positions"
         />
 
         <DataCard 
           title="Long Utilization Rate (ETH)"
-          data={poolComputed.assetTokenUtilization}
+          data={currentComputed.assetTokenUtilization}
+          unit="%"
           description="ETH utilized in long positions"
         />
 
@@ -194,43 +235,43 @@ const Pools = (props) => {
         <DataCard 
           grid={12}
           title="Total DAI in Short Pool"
-          data={prettyFromWei(poolComputed.stableTokenTotal)}
+          data={prettyFromWei(currentComputed.stableTokenTotal)}
           unit="DAI"
           description="Total DAI available"
         />
 
         <DataCard 
           title="Open Shorts (DAI)"
-          data={prettyFromWei(pool.shortBorrowValue)}
+          data={prettyFromWei(current.shortBorrowValue)}
           unit="DAI"
           description="Total DAI borrowed by short positions"
         />
 
         <DataCard 
           title="Open Shorts (ETH)"
-          data={prettyFromWei(pool.shortAssetBorrowPool)}
+          data={prettyFromWei(current.shortAssetBorrowPool)}
           unit="ETH"
           description="Equivalent ETH borrowed by short positions"
         />
 
         <DataCard 
           title="Available Leverage (DAI)"
-          data={prettyFromWei(pool.stableTokenAvailable)}
+          data={prettyFromWei(current.stableTokenAvailable)}
           unit="DAI"
           description="Total DAI available for short positions"
         />
 
         <DataCard 
           title="Short Utilization Rate (DAI)"
-          data={poolComputed.stableTokenUtilization}
-          unit="DAI"
+          data={currentComputed.stableTokenUtilization}
+          unit="%"
           description="the amount of stable currently being borrowed by short trades"
         />      
 
         <DataCard 
           grid={12}
           title="Total in Contract (DAI)"
-          data={prettyFromWei(pool.stableTokenCollateralPool)}
+          data={prettyFromWei(current.stableTokenCollateralPool)}
           unit="DAI"
           description="Total collateral DAI held in contract"
         />

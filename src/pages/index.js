@@ -20,11 +20,11 @@ const IndexPage = props => {
       <br/>
       <br/>
       <br/>
-      TODO NOTE: the rest below here is still being calculated
+      {/* TODO NOTE: the rest below here is still being calculated */}
       <br/>
       <hr/>
       {/* <Pools /> */}
-      <Positions />
+      {/* <Positions /> */}
     </Layout>
   )
 }
